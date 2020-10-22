@@ -13,7 +13,7 @@ public class QBreakpointHandler extends XBreakpointHandler {
   protected QBreakpointHandler(@NotNull Class breakpointTypeClass) {
     super(breakpointTypeClass);
 
-    File brkpointDir = new File("/tmp/breakpoints");
+    File brkpointDir = new File("/tmp/breakpoint");
     brkpointDir.mkdir();
   }
 
@@ -21,7 +21,7 @@ public class QBreakpointHandler extends XBreakpointHandler {
   public void registerBreakpoint(@NotNull XBreakpoint breakpoint) {
     String fileName = ((XLineBreakpointImpl) breakpoint).getFile().getNameWithoutExtension();
     int line = ((XLineBreakpointImpl) breakpoint).getLine();
-    File f = new File("/tmp/breakpoints/" + fileName + "_" + line + ".brq");
+    File f = new File("/tmp/breakpoint/" + fileName + "_" + line + ".brq");
     try {
       f.createNewFile();
     } catch (IOException e) {
@@ -33,7 +33,7 @@ public class QBreakpointHandler extends XBreakpointHandler {
   public void unregisterBreakpoint(@NotNull XBreakpoint breakpoint, boolean temporary) {
     String fileName = ((XLineBreakpointImpl) breakpoint).getFile().getNameWithoutExtension();
     int line = ((XLineBreakpointImpl) breakpoint).getLine();
-    File f = new File("/tmp/breakpoints/" + fileName + "_" + line + ".brq");
+    File f = new File("/tmp/breakpoint/" + fileName + "_" + line + ".brq");
     f.delete();
   }
 }
