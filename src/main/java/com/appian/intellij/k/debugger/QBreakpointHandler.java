@@ -1,38 +1,39 @@
 package com.appian.intellij.k.debugger;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.intellij.xdebugger.breakpoints.XBreakpointHandler;
+import com.intellij.xdebugger.impl.breakpoints.XLineBreakpointImpl;
 
 public class QBreakpointHandler extends XBreakpointHandler {
   protected QBreakpointHandler(@NotNull Class breakpointTypeClass) {
     super(breakpointTypeClass);
+
+    File brkpointDir = new File("/tmp/breakpoints");
+    brkpointDir.mkdir();
   }
 
   @Override
   public void registerBreakpoint(@NotNull XBreakpoint breakpoint) {
-    File f = new File("/tmp/test_q/working.txt");
+    String fileName = ((XLineBreakpointImpl) breakpoint).getFile().getNameWithoutExtension();
+    int line = ((XLineBreakpointImpl) breakpoint).getLine();
+    File f = new File("/tmp/breakpoints/" + fileName + "_" + line + ".brq");
     try {
-      FileOutputStream out = new FileOutputStream(f);
-      out.write("Suprise".getBytes());
-      out.flush();
-      out.close();
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
+      f.createNewFile();
     } catch (IOException e) {
       e.printStackTrace();
     }
-    System.out.println("SUPRISE");
   }
 
   @Override
   public void unregisterBreakpoint(@NotNull XBreakpoint breakpoint, boolean temporary) {
-
+    String fileName = ((XLineBreakpointImpl) breakpoint).getFile().getNameWithoutExtension();
+    int line = ((XLineBreakpointImpl) breakpoint).getLine();
+    File f = new File("/tmp/breakpoints/" + fileName + "_" + line + ".brq");
+    f.delete();
   }
 }

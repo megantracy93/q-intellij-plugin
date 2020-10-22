@@ -18,6 +18,7 @@ public class QDebugProcess extends XDebugProcess {
     super(session);
     this.state = state;
     this.execute = execute;
+    this.breakpointHandler = new QBreakpointHandler(QBreakpointType.class);
   }
 
   @NotNull
@@ -29,6 +30,6 @@ public class QDebugProcess extends XDebugProcess {
   @NotNull
   @Override
   public XDebuggerEditorsProvider getEditorsProvider() {
-    return null;
+    return QDebuggerEditorsProvider.INSTANCE;
   }
 }

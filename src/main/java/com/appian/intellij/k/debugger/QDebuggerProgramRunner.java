@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.RunProfile;
 import com.intellij.execution.configurations.RunProfileState;
+import com.intellij.execution.executors.DefaultDebugExecutor;
 import com.intellij.execution.runners.DefaultProgramRunner;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.ui.RunContentDescriptor;
@@ -27,7 +28,8 @@ public class QDebuggerProgramRunner extends DefaultProgramRunner {
    *  know that we can run doExecute below**/
   @Override
   public boolean canRun(@NotNull String executorId, @NotNull RunProfile profile) {
-    return false;
+    return executorId.equals(DefaultDebugExecutor.EXECUTOR_ID) &&
+        profile instanceof QDebugConfiguration;
   }
 
   @NotNull
