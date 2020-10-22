@@ -59,7 +59,7 @@ public class QDebugProcess extends XDebugProcess {
   private void initializeWatch() {
     fileWatchThread = new Thread() {
       @Override
-      public void start() {
+      public void run() {
         watchForBrqnFiles();
       }
     };
@@ -77,37 +77,42 @@ public class QDebugProcess extends XDebugProcess {
 
     Path dirToWatch = Paths.get("/tmp/breakpoint");
     try {
-      dirToWatch.register(ws, ENTRY_CREATE);
+      WatchKey key = dirToWatch.register(ws, ENTRY_CREATE);
     } catch (IOException e) {
       e.printStackTrace();
     }
     while (true) {
       try {
-        assert ws != null;
         WatchKey watchKey = ws.take();
-        for (WatchEvent<?> event : watchKey.pollEvents()) {
-          if (event.kind() != ENTRY_CREATE) {
-            continue;
-          }
+        try {
+          for (WatchEvent<?> event : watchKey.pollEvents()) {
+            if (event.kind() != ENTRY_CREATE) {
+              continue;
+            }
 
-          WatchEvent<Path> pathEvent = (WatchEvent<Path>)event;
-          Path filename = pathEvent.context();
-          if (filename == null) {
-            System.out.println("Skipping: null context");
-            continue;
-          }
+            WatchEvent<Path> pathEvent = (WatchEvent<Path>) event;
+            Path filename = pathEvent.context();
+            if (filename == null) {
+              System.out.println("Skipping: null context");
+              continue;
+            }
 
-          if (!filename.toString().endsWith(".brqn")) {
-            continue;
-          }
+            if (!filename.toString().endsWith(".brqn")) {
+              continue;
+            }
 
-          String[] fileAndLine = filename.getFileName().toString().split("_");
-          String fileName = fileAndLine[0];
-          int line = Integer.parseInt(fileAndLine[1]);
-          // at this point we know that a file with the extension .brqn has been created
-          // Should we have them write the full filename to the file?
+            String[] fileAndLine = filename.getFileName().toString().split("_");
+            String fileName = fileAndLine[0];
+            String line = fileAndLine[1].split("\\.")[0];
+            System.out.println(fileName + " @ " + line);
+            // at this point we know that a file with the extension .brqn has been created
+            // Should we have them write the full filename to the file?
+          }
+        }  finally {
+          // want to make sure we _always_ reset the watch key
+          watchKey.reset();
         }
-      } catch (InterruptedException e) {
+      } catch (Exception e) {
         e.printStackTrace();
       }
     }
