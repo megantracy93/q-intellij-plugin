@@ -210,6 +210,7 @@
   </change-notes>
   <depends>com.intellij.modules.platform</depends>
   <depends>com.intellij.modules.lang</depends>
+  <depends>com.intellij.modules.java</depends>
   <project-components>
     <component>
       <implementation-class>com.appian.intellij.k.KProjectComponent</implementation-class>
@@ -253,6 +254,8 @@
     <xdebugger.breakpointType implementation="com.appian.intellij.k.debugger.QBreakpointType" />
     <configurationType implementation="com.appian.intellij.k.debugger.QDebuggingConfigurationType" />
     <programRunner implementation="com.appian.intellij.k.debugger.QDebuggerProgramRunner" />
+
+    <stepsBeforeRunProvider implementation="com.appian.intellij.k.debugger.StartQTestDebuggerBeforeRunTaskProvider" id="q.beforeRun.startQTestDebugger"/>
   </extensions>
   <actions>
 
