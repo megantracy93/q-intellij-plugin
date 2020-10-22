@@ -248,6 +248,11 @@
     <refactoring.elementListenerProvider implementation="com.appian.intellij.k.KRefactoringListenerProvider"/>
     <usageTypeProvider implementation="com.appian.intellij.k.KUsageTypeProvider"/>
     <renameHandler implementation="com.appian.intellij.k.KVariableInplaceRenameHandler"/>
+
+    <!-- IntelliJ Debugging Configurations -->
+    <xdebugger.breakpointType implementation="com.appian.intellij.k.debugger.QBreakpointType" />
+    <configurationType implementation="com.appian.intellij.k.debugger.QDebuggingConfigurationType" />
+    <programRunner implementation="com.appian.intellij.k.debugger.QDebuggerProgramRunner" />
   </extensions>
   <actions>
 
@@ -293,5 +298,10 @@
       <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl alt R"/>
     </action>
     <!-- end keyboard shortcuts -->
+    <action id="q-debugger" class="com.appian.intellij.k.debugger.QDebuggerAction" text="QDebuggerAction"
+            description="QDebuggerAction">
+      <add-to-group group-id="DebugMainMenu" anchor="first"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="meta alt K"/>
+    </action>
   </actions>
 </idea-plugin>
