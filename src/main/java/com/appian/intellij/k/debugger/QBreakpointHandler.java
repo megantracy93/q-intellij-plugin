@@ -19,7 +19,7 @@ public class QBreakpointHandler extends XBreakpointHandler {
 
   @Override
   public void registerBreakpoint(@NotNull XBreakpoint breakpoint) {
-    String fileName = ((XLineBreakpointImpl) breakpoint).getFile().getNameWithoutExtension();
+    String fileName = ((XLineBreakpointImpl) breakpoint).getFile().getName();
     int line = ((XLineBreakpointImpl) breakpoint).getLine();
     File f = new File("/tmp/breakpoint/" + fileName + "_" + line + ".brq");
     try {
@@ -31,7 +31,7 @@ public class QBreakpointHandler extends XBreakpointHandler {
 
   @Override
   public void unregisterBreakpoint(@NotNull XBreakpoint breakpoint, boolean temporary) {
-    String fileName = ((XLineBreakpointImpl) breakpoint).getFile().getNameWithoutExtension();
+    String fileName = ((XLineBreakpointImpl) breakpoint).getFile().getName();
     int line = ((XLineBreakpointImpl) breakpoint).getLine();
     File f = new File("/tmp/breakpoint/" + fileName + "_" + line + ".brq");
     f.delete();
