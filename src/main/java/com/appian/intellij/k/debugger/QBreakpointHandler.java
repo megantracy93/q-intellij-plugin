@@ -25,7 +25,7 @@ public class QBreakpointHandler extends XBreakpointHandler {
   @Override
   public void registerBreakpoint(@NotNull XBreakpoint breakpoint) {
     String fileName = ((XLineBreakpointImpl) breakpoint).getFile().getName();
-    int line = ((XLineBreakpointImpl) breakpoint).getLine();
+    int line = ((XLineBreakpointImpl) breakpoint).getLine() + 1;
     File f = new File("/tmp/breakpoint/" + fileName + "_" + line + ".brq");
     try {
       f.createNewFile();
