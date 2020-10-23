@@ -80,7 +80,7 @@ public class QBreakpointReachedFileWatcher extends Thread {
             currentBrqnFile = filename.toString();
             String[] fileAndLine = filename.getFileName().toString().split("_");
             String fileName = fileAndLine[0];
-            int lineNumber = Integer.parseInt(fileAndLine[1].split("\\.")[0]);
+            int lineNumber = Integer.parseInt(fileAndLine[1].split("\\.")[0]) - 1;
             qBreakpointReachedHandler.process(fileName, lineNumber);
             atBreakpoint = true;
           }

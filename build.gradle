@@ -25,6 +25,10 @@ intellij {
   plugins = ["java"]
 }
 
+runIde {
+  maxHeapSize='2048m'
+}
+
 version '1.26' // Plugin version
 patchPluginXml {
   untilBuild '202.*'
