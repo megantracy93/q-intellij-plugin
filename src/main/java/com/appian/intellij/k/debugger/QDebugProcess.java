@@ -16,7 +16,7 @@ public class QDebugProcess extends XDebugProcess {
   private RunProfileState state;
   private ExecutionResult execute;
   private QBreakpointHandler breakpointHandler;
-  private Thread fileWatchThread;
+  private QBreakpointReachedFileWatcher fileWatchThread;
   private final BreakpointService breakpointService;
 
   public QDebugProcess(XDebugSession session, RunProfileState state, ExecutionResult execute) {
@@ -49,12 +49,14 @@ public class QDebugProcess extends XDebugProcess {
 
   @Override
   public void resume(@Nullable XSuspendContext context) {
-    getSession().resume();
+    if (fileWatchThread.atBreakpoint()) {
+      fileWatchThread.deleteCurrentBrqnFile();
+      getSession().resume();
+    }
   }
 
   private void initializeWatch() {
     fileWatchThread = new QBreakpointReachedFileWatcher(qBreakpointReachedHandler);
     fileWatchThread.start();
   }
-
 }

@@ -2,6 +2,7 @@ package com.appian.intellij.k.debugger;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -17,6 +18,8 @@ public class QBreakpointReachedFileWatcher extends Thread {
   private final WatchService ws;
   private final QBreakpointReachedHandler qBreakpointReachedHandler;
   private AtomicInteger exitCode = new AtomicInteger(0);
+  private String currentBrqnFile = "";
+  private boolean atBreakpoint = false;
 
   public QBreakpointReachedFileWatcher(QBreakpointReachedHandler qBreakpointReachedHandler) {
     this.qBreakpointReachedHandler = qBreakpointReachedHandler;
@@ -74,10 +77,12 @@ public class QBreakpointReachedFileWatcher extends Thread {
               continue;
             }
 
+            currentBrqnFile = filename.toString();
             String[] fileAndLine = filename.getFileName().toString().split("_");
             String fileName = fileAndLine[0];
             int lineNumber = Integer.parseInt(fileAndLine[1].split("\\.")[0]);
             qBreakpointReachedHandler.process(fileName, lineNumber);
+            atBreakpoint = true;
           }
         } finally {
           // want to make sure we _always_ reset the watch key
@@ -87,5 +92,24 @@ public class QBreakpointReachedFileWatcher extends Thread {
         e.printStackTrace();
       }
     }
+  }
+
+  public boolean atBreakpoint() {
+    return atBreakpoint;
+  }
+
+  public void deleteCurrentBrqnFile() {
+    if (currentBrqnFile.equals("")) {
+      return;
+    }
+    File brqnFile = new File("/tmp/breakpoint", currentBrqnFile);
+    boolean didDelete = brqnFile.delete();
+    if (!didDelete) {
+      System.out.println("Guess we're cooked?");
+      return;
+    }
+
+    atBreakpoint = false;
+    currentBrqnFile = "";
   }
 }
