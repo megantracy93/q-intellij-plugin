@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import javax.swing.*;
+import javax.swing.Icon;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -100,7 +100,7 @@ public class StartQTestDebuggerBeforeRunTaskProvider extends BeforeRunTaskProvid
       @NotNull ExecutionEnvironment executionEnvironment,
       @NotNull StartQTestDebuggerBeforeRunTask beforeRunTask) {
 
-    return beforeRunTask.getSailDebugTestsConfiguration(runConfiguration.getProject()).map(sailDebugConfiguration -> {
+    return beforeRunTask.getQDebugTestsConfiguration(runConfiguration.getProject()).map(sailDebugConfiguration -> {
       try {
         executeDebugConfiguration(sailDebugConfiguration);
         return true;
@@ -123,12 +123,16 @@ public class StartQTestDebuggerBeforeRunTaskProvider extends BeforeRunTaskProvid
       super(providerId);
     }
 
-    public Optional<RunnerAndConfigurationSettings> getSailDebugTestsConfiguration(Project project) {
+    public Optional<RunnerAndConfigurationSettings> getQDebugTestsConfiguration(Project project) {
       QDebuggingConfigurationType qDebuggingConfigurationType = QDebuggingConfigurationType.getInstance();
       if (project != null && qDebuggingConfigurationType != null) {
-        RunnerAndConfigurationSettings qDebugConfiguration = RunManager.getInstance(project)
+        RunManager runManager = RunManager.getInstance(project);
+        RunnerAndConfigurationSettings qDebugConfiguration = runManager
             .findConfigurationByTypeAndName(qDebuggingConfigurationType, TEST_CONFIGURATION);
-        return Optional.ofNullable(qDebugConfiguration);
+        if (qDebugConfiguration == null) {
+          qDebugConfiguration = runManager.createConfiguration(TEST_CONFIGURATION, QDebuggingConfigurationType.class);
+        }
+        return Optional.of(qDebugConfiguration);
       }
       return Optional.empty();
     }

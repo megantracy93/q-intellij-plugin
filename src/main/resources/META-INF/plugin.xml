@@ -303,7 +303,7 @@
     <!-- end keyboard shortcuts -->
     <action id="q-debugger" class="com.appian.intellij.k.debugger.QDebuggerAction" text="QDebuggerAction"
             description="QDebuggerAction">
-      <add-to-group group-id="DebugMainMenu" anchor="first"/>
+      <add-to-group group-id="RunContextGroup" anchor="after" relative-to-action="RunContextGroupInner"/>
       <keyboard-shortcut keymap="$default" first-keystroke="meta alt K"/>
     </action>
   </actions>
