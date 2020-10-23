@@ -7,11 +7,16 @@ import org.jetbrains.annotations.NotNull;
 
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.intellij.xdebugger.breakpoints.XBreakpointHandler;
+import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.intellij.xdebugger.impl.breakpoints.XLineBreakpointImpl;
 
 public class QBreakpointHandler extends XBreakpointHandler {
-  protected QBreakpointHandler(@NotNull Class breakpointTypeClass) {
+  private BreakpointService breakpointService;
+
+  protected QBreakpointHandler(
+      @NotNull Class breakpointTypeClass, BreakpointService breakpointService) {
     super(breakpointTypeClass);
+    this.breakpointService = breakpointService;
 
     File brkpointDir = new File("/tmp/breakpoint");
     brkpointDir.mkdir();
@@ -27,6 +32,7 @@ public class QBreakpointHandler extends XBreakpointHandler {
     } catch (IOException e) {
       e.printStackTrace();
     }
+    breakpointService.addBreakpoint((XLineBreakpoint) breakpoint);
   }
 
   @Override
@@ -35,5 +41,12 @@ public class QBreakpointHandler extends XBreakpointHandler {
     int line = ((XLineBreakpointImpl) breakpoint).getLine();
     File f = new File("/tmp/breakpoint/" + fileName + "_" + line + ".brq");
     f.delete();
+    breakpointService.removeBreakpoint((XLineBreakpoint) breakpoint);
+  }
+
+  public void unregisterAllBreakpoints() {
+    for (XLineBreakpoint breakpoint : breakpointService.getXLineBreakpoints()) {
+      unregisterBreakpoint(breakpoint, false);
+    }
   }
 }
