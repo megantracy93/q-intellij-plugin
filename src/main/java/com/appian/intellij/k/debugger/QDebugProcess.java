@@ -1,16 +1,7 @@
 package com.appian.intellij.k.debugger;
 
-import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
-
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchKey;
-import java.nio.file.WatchService;
-
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.intellij.execution.ExecutionResult;
 import com.intellij.execution.configurations.RunProfileState;
@@ -18,19 +9,23 @@ import com.intellij.xdebugger.XDebugProcess;
 import com.intellij.xdebugger.XDebugSession;
 import com.intellij.xdebugger.breakpoints.XBreakpointHandler;
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider;
+import com.intellij.xdebugger.frame.XSuspendContext;
 
 public class QDebugProcess extends XDebugProcess {
+  private final QBreakpointReachedHandler qBreakpointReachedHandler;
   private RunProfileState state;
   private ExecutionResult execute;
   private QBreakpointHandler breakpointHandler;
   private Thread fileWatchThread;
-  private WatchService ws;
+  private final BreakpointService breakpointService;
 
   public QDebugProcess(XDebugSession session, RunProfileState state, ExecutionResult execute) {
     super(session);
     this.state = state;
     this.execute = execute;
-    this.breakpointHandler = new QBreakpointHandler(QBreakpointType.class);
+    breakpointService = new BreakpointService();
+    this.breakpointHandler = new QBreakpointHandler(QBreakpointType.class, breakpointService);
+    qBreakpointReachedHandler = new QBreakpointReachedHandler(breakpointService, getSession());
     initializeWatch();
   }
 
@@ -48,73 +43,18 @@ public class QDebugProcess extends XDebugProcess {
 
   @Override
   public void stop() {
-    try {
-      ws.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    fileWatchThread.stop();
+    fileWatchThread.interrupt();
+    breakpointHandler.unregisterAllBreakpoints();
+  }
+
+  @Override
+  public void resume(@Nullable XSuspendContext context) {
+    getSession().resume();
   }
 
   private void initializeWatch() {
-    fileWatchThread = new Thread() {
-      @Override
-      public void run() {
-        watchForBrqnFiles();
-      }
-    };
-
+    fileWatchThread = new QBreakpointReachedFileWatcher(qBreakpointReachedHandler);
     fileWatchThread.start();
   }
 
-  private void watchForBrqnFiles() {
-    ws = null;
-    try {
-      ws = FileSystems.getDefault().newWatchService();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-
-    Path dirToWatch = Paths.get("/tmp/breakpoint");
-    try {
-      WatchKey key = dirToWatch.register(ws, ENTRY_CREATE);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    while (true) {
-      try {
-        WatchKey watchKey = ws.take();
-        try {
-          for (WatchEvent<?> event : watchKey.pollEvents()) {
-            if (event.kind() != ENTRY_CREATE) {
-              continue;
-            }
-
-            WatchEvent<Path> pathEvent = (WatchEvent<Path>) event;
-            Path filename = pathEvent.context();
-            if (filename == null) {
-              System.out.println("Skipping: null context");
-              continue;
-            }
-
-            if (!filename.toString().endsWith(".brqn")) {
-              continue;
-            }
-
-            String[] fileAndLine = filename.getFileName().toString().split("_");
-            String fileName = fileAndLine[0];
-            String line = fileAndLine[1].split("\\.")[0];
-            System.out.println(fileName + " @ " + line);
-            // at this point we know that a file with the extension .brqn has been created
-            // Should we have them write the full filename to the file?
-          }
-        }  finally {
-          // want to make sure we _always_ reset the watch key
-          watchKey.reset();
-        }
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
 }
